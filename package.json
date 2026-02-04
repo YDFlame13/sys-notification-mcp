@@ -1,0 +1,46 @@
+{
+  "name": "sys-notification-mcp",
+  "version": "1.0.0",
+  "description": "跨平台MCP服务器，提供系统通知功能 - 支持macOS、Windows和Linux",
+  "type": "module",
+  "main": "index.js",
+  "bin": {
+    "sys-notification-mcp": "index.js"
+  },
+  "scripts": {
+    "start": "node index.js",
+    "test": "node test.js",
+    "dev": "node index.js",
+    "prepublishOnly": "npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "keywords": [
+    "mcp",
+    "通知",
+    "跨平台",
+    "模型上下文协议",
+    "claude",
+    "系统通知",
+    "macos",
+    "windows",
+    "linux"
+  ],
+  "author": "YDFlame13 <wwsflame@qq.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/YDFlame13/sys-notification-mcp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/YDFlame13/sys-notification-mcp/issues"
+  },
+  "homepage": "https://github.com/YDFlame13/sys-notification-mcp#readme",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

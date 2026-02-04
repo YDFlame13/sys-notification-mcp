@@ -1,0 +1,147 @@
+全局规则
+====================
+
+⚠️ 强制执行规则
+------------------
+
+此规则文件为全局强制性规则，AI 必须严格遵守以下规定：
+
+1. 强制通知：完成问题回答后，必须调用 notify 发送完成通知
+2. 豁免条件：仅当用户在问答中明确说明不需要通知时（如"不用通知"、"无需提醒"等），才可以跳过通知
+3. 性能优化：避免通知过频，同一类型通知在5分钟内不重复发送
+4. 跨平台兼容：自动适配macOS、Windows、Linux三大操作系统
+
+
+通知类型定义
+------------------
+
+1. 需要用户授权时 (authorization) - 优先级: high
+   - 执行终端命令
+   - 修改或删除文件
+   - 安装依赖包
+   - 运行构建脚本
+   - 任何可能影响系统的操作
+
+2. 生成完成时 (completed) - 优先级: medium
+   - 完成代码生成
+   - 完成问题回答（强制）
+   - 完成代码重构
+   - 完成 bug 修复
+   - 完成文件编辑
+
+3. 等待用户输入时 (waiting) - 优先级: medium
+   - 需要用户选择方案
+   - 需要用户提供更多上下文
+   - 需要用户确认理解是否正确
+   - 遇到歧义需要用户澄清
+
+4. 发生错误时 (error) - 优先级: high
+   - 命令执行失败
+   - 文件操作失败
+   - 编译/构建错误
+   - 依赖安装失败
+   - 网络连接失败
+   - 权限不足错误
+   - 文件不存在错误
+
+
+调用时机规则
+------------------
+
+1. 强制通知完成：所有问答结束时必须发送 completed 类型通知
+2. 用户豁免优先：用户明确表示不需要通知时可跳过
+3. 批量操作合并：多个相关操作合并为单个通知
+4. 关键节点通知：在重要里程碑发送通知
+5. 错误立即通知：遇到错误立即发送，不等待完成
+6. 跨平台适配：系统自动处理不同操作系统的通知实现
+
+
+技术实现规范
+------------------
+
+MCP 工具调用格式：
+
+{
+  "serverName": "sys-notification-mcp",
+  "toolName": "notify",
+  "arguments": {
+    "type": "authorization | completed | waiting | error | info",
+    "priority": "high | medium | low",
+    "message": "通知消息内容",
+    "timeout": 300,  // 可选：超时时间（秒）
+    "retry": false   // 可选：是否允许重试
+  }
+}
+
+
+自定义选项
+------------------
+
+如需自定义标题或提示音：
+
+{
+  "serverName": "sys-notification-mcp",
+  "toolName": "notify",
+  "arguments": {
+    "type": "completed",
+    "priority": "medium",
+    "message": "任务完成",
+    "title": "🎉 自定义标题",
+    "sound": "Hero"
+  }
+}
+
+可用的提示音（跨平台映射）：
+- Basso → macOS: Basso, Windows: SystemExclamation, Linux: dialog-warning
+- Blow → macOS: Blow, Windows: SystemHand, Linux: dialog-error
+- Bottle → macOS: Bottle, Windows: SystemAsterisk, Linux: message
+- Frog → macOS: Frog, Windows: SystemQuestion, Linux: dialog-question
+- Funk → macOS: Funk, Windows: SystemExclamation, Linux: dialog-information
+- Glass → macOS: Glass, Windows: SystemNotification, Linux: complete
+- Hero → macOS: Hero, Windows: SystemNotification, Linux: complete
+- Morse → macOS: Morse, Windows: SystemExclamation, Linux: dialog-warning
+- Ping → macOS: Ping, Windows: SystemNotification, Linux: message
+- Pop → macOS: Pop, Windows: SystemDefault, Linux: dialog-information
+- Purr → macOS: Purr, Windows: SystemDefault, Linux: dialog-information
+- Sosumi → macOS: Sosumi, Windows: SystemHand, Linux: dialog-error
+- Submarine → macOS: Submarine, Windows: SystemAsterisk, Linux: message
+- Tink → macOS: Tink, Windows: SystemDefault, Linux: dialog-information
+
+
+跨平台兼容性
+------------------
+
+1. macOS: 原生支持所有14种系统提示音，使用osascript发送通知
+2. Windows: Toast通知 + SystemSounds系统声音，使用PowerShell实现
+3. Linux: 桌面通知 + canberra-gtk-play/paplay声音，使用notify-send实现
+4. 智能映射：系统自动将提示音映射为对应平台的等效声音
+
+
+例外情况处理
+------------------
+
+1. 测试环境：在测试模式下可降低通知频率
+2. 批量模式：批量处理任务时使用汇总通知
+3. 静默模式：用户明确要求静默操作时暂停通知
+4. 紧急情况：系统级错误不受频率限制
+5. 平台限制：某些Linux发行版可能需要额外安装声音播放工具
+
+
+性能优化指南
+------------------
+
+1. 频率控制：同一类型通知2分钟内不重复
+2. 内容精简：通知消息简洁明了
+3. 批量合并：相关操作合并通知
+4. 优先级管理：根据重要性调整通知策略
+5. 平台优化：针对不同操作系统使用最优实现方式
+
+
+推荐使用说明
+------------------
+
+强烈推荐所有AI助手使用此规则文件，以确保：
+- 一致的用户体验：跨平台提供统一的通知行为
+- 及时的用户交互：在关键节点及时通知用户
+- 错误及时处理：遇到问题立即通知用户
+- 性能优化：避免通知过频影响用户体验
