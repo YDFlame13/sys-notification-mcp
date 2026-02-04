@@ -22,6 +22,72 @@ const execAsync = promisify(exec);
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+// 命令行参数解析
+function parseArgs() {
+  const args = process.argv.slice(2);
+  const parsed = {
+    help: false,
+    version: false,
+    verbose: false
+  };
+
+  for (const arg of args) {
+    if (arg === '--help' || arg === '-h') {
+      parsed.help = true;
+    } else if (arg === '--version' || arg === '-v') {
+      parsed.version = true;
+    } else if (arg === '--verbose') {
+      parsed.verbose = true;
+    }
+  }
+
+  return parsed;
+}
+
+// 显示帮助信息
+function showHelp() {
+  console.log(`
+sys-notification-mcp - 跨平台MCP通知服务器 v1.0.0
+
+用法: sys-notification-mcp [选项]
+
+选项:
+  -h, --help     显示此帮助信息
+  -v, --version  显示版本信息
+  --verbose      启用详细日志输出
+
+描述:
+  这是一个MCP（模型上下文协议）服务器，提供跨平台系统通知功能。
+  支持macOS、Windows和Linux系统，包含14种不同的提示音。
+
+工具功能:
+  • notify - 发送系统通知，支持5种通知类型
+  • list_notification_types - 列出所有通知类型和声音配置
+  • get_system_info - 获取系统通知支持信息
+
+通知类型:
+  • authorization - 需要用户授权时使用
+  • completed - 任务完成时使用  
+  • waiting - 等待用户响应时使用
+  • error - 发生错误时使用
+  • info - 一般信息时使用
+
+平台支持:
+  • macOS: 原生通知，支持14种系统提示音
+  • Windows: Toast通知 + 系统声音播放
+  • Linux: 桌面通知 + 系统声音播放
+
+项目主页: https://github.com/YDFlame13/sys-notification-mcp
+`);
+}
+
+// 显示版本信息
+function showVersion() {
+  console.log('sys-notification-mcp v1.0.0');
+  console.log('跨平台MCP通知服务器');
+  console.log('Node.js', process.version);
+}
+
 // 跨平台支持的提示音映射
 const SOUND_MAPPING = {
   // macOS 原生提示音
@@ -413,9 +479,28 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
 
 // 启动服务器
 async function main() {
+  const args = parseArgs();
+
+  // 处理命令行参数
+  if (args.help) {
+    showHelp();
+    process.exit(0);
+  }
+
+  if (args.version) {
+    showVersion();
+    process.exit(0);
+  }
+
+  // 正常启动MCP服务器
   const transport = new StdioServerTransport();
   await server.connect(transport);
-  console.error("MCP通知服务器在stdio上运行");
+  
+  if (args.verbose) {
+    console.error("MCP通知服务器在stdio上运行 - 详细模式已启用");
+  } else {
+    console.error("MCP通知服务器在stdio上运行");
+  }
 }
 
 main().catch(console.error);

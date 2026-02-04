@@ -88,30 +88,57 @@
   - Windows: PowerShell 5.0+
   - Linux: notify-send (通常随桌面环境安装)
 
-### 安装步骤
-1. 克隆项目
+### 方式一：npm全局安装（推荐）
 ```bash
+# 全局安装MCP服务器
+npm install -g sys-notification-mcp
+
+# 验证安装
+sys-notification-mcp --help
+```
+
+### 方式二：本地源码安装
+```bash
+# 克隆项目
 git clone <repository-url>
 cd sys-notification-mcp
-```
 
-2. 安装依赖
-```bash
+# 安装依赖
 npm install
+
+# 本地运行测试
+node index.js
 ```
 
-3. 配置MCP客户端
+### MCP客户端配置
+
+#### 全局安装配置（方式一）
 在MCP客户端配置文件中添加：
 ```json
 {
   "mcpServers": {
-    "sys-notification": {
+    "sys-notification-mcp": {
+      "command": "sys-notification-mcp"
+    }
+  }
+}
+```
+
+#### 本地安装配置（方式二）
+在MCP客户端配置文件中添加（使用绝对路径）：
+```json
+{
+  "mcpServers": {
+    "sys-notification-mcp": {
       "command": "node",
       "args": ["/path/to/sys-notification-mcp/index.js"]
     }
   }
 }
 ```
+
+### 配置验证
+配置完成后，重启MCP客户端，AI助手应该能够识别并使用通知功能。
 
 ## 📜 推荐配合规则文件使用
 
