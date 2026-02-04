@@ -1,119 +1,123 @@
-# MCP 跨平台系统通知服务器
+# MCP Cross-Platform System Notification Server
 
-一个为AI助手提供跨平台系统通知功能的MCP服务器，支持macOS、Windows和Linux三大操作系统，并具备完整的提示音支持。
+[中文](README_zh.md)
 
-## 🎯 功能特性
+Tired of missing important notifications while coding? Try this MCP + rule solution to never miss a beat.
 
-### 跨平台通知支持
-- **macOS**: 原生系统通知，完全支持14种系统提示音
-- **Windows**: Toast通知 + SystemSounds系统声音播放
-- **Linux**: 桌面通知 + canberra-gtk-play/paplay系统声音
+A Model Context Protocol (MCP) server that provides cross-platform system notification functionality for AI assistants, supporting macOS, Windows, and Linux with complete sound support.
 
-### 通知类型
-- **authorization**: 需要用户授权时（如运行终端命令）
-- **completed**: 任务完成时（如代码生成完成）
-- **waiting**: 等待用户响应时
-- **error**: 发生错误时
-- **info**: 一般信息通知
+## 🎯 Features
 
-### 提示音支持
-所有平台都支持相同的14种提示音，系统会自动进行跨平台映射：
+### Cross-Platform Notification Support
+- **macOS**: Native system notifications with full support for 14 system sounds
+- **Windows**: Toast notifications + SystemSounds playback
+- **Linux**: Desktop notifications + canberra-gtk-play/paplay system sounds
 
-| 提示音 | macOS | Windows | Linux |
-|--------|-------|---------|-------|
-| Basso | ✅ 原生 | SystemExclamation | dialog-warning |
-| Blow | ✅ 原生 | SystemHand | dialog-error |
-| Bottle | ✅ 原生 | SystemAsterisk | message |
-| Frog | ✅ 原生 | SystemQuestion | dialog-question |
-| Funk | ✅ 原生 | SystemExclamation | dialog-information |
-| Glass | ✅ 原生 | SystemNotification | complete |
-| Hero | ✅ 原生 | SystemNotification | complete |
-| Morse | ✅ 原生 | SystemExclamation | dialog-warning |
-| Ping | ✅ 原生 | SystemNotification | message |
-| Pop | ✅ 原生 | SystemDefault | dialog-information |
-| Purr | ✅ 原生 | SystemDefault | dialog-information |
-| Sosumi | ✅ 原生 | SystemHand | dialog-error |
-| Submarine | ✅ 原生 | SystemAsterisk | message |
-| Tink | ✅ 原生 | SystemDefault | dialog-information |
+### Notification Types
+- **authorization**: When user authorization is required (e.g., running terminal commands)
+- **completed**: When tasks are completed (e.g., code generation finished)
+- **waiting**: When waiting for user response
+- **error**: When errors occur
+- **info**: General information notifications
 
-## 📋 使用方法
+### Sound Support
+All platforms support the same 14 sounds with automatic cross-platform mapping:
 
-### 基本通知
+| Sound | macOS | Windows | Linux |
+|-------|-------|---------|-------|
+| Basso | ✅ Native | SystemExclamation | dialog-warning |
+| Blow | ✅ Native | SystemHand | dialog-error |
+| Bottle | ✅ Native | SystemAsterisk | message |
+| Frog | ✅ Native | SystemQuestion | dialog-question |
+| Funk | ✅ Native | SystemExclamation | dialog-information |
+| Glass | ✅ Native | SystemNotification | complete |
+| Hero | ✅ Native | SystemNotification | complete |
+| Morse | ✅ Native | SystemExclamation | dialog-warning |
+| Ping | ✅ Native | SystemNotification | message |
+| Pop | ✅ Native | SystemDefault | dialog-information |
+| Purr | ✅ Native | SystemDefault | dialog-information |
+| Sosumi | ✅ Native | SystemHand | dialog-error |
+| Submarine | ✅ Native | SystemAsterisk | message |
+| Tink | ✅ Native | SystemDefault | dialog-information |
+
+## 📋 Usage
+
+### Basic Notification
 ```json
 {
   "serverName": "sys-notification-mcp",
   "toolName": "notify",
   "arguments": {
     "type": "completed",
-    "message": "代码生成已完成，请查看结果"
+    "message": "Code generation completed, please check the result"
   }
 }
 ```
 
-### 自定义通知
+### Custom Notification
 ```json
 {
   "serverName": "sys-notification-mcp",
   "toolName": "notify",
   "arguments": {
     "type": "authorization",
-    "message": "需要您的授权来运行终端命令",
-    "title": "🔐 权限请求",
+    "message": "Your authorization is required to run terminal commands",
+    "title": "🔐 Permission Request",
     "sound": "Glass"
   }
 }
 ```
 
-### 查询功能
+### Query Functions
 ```json
-// 列出所有通知类型
+// List all notification types
 {
   "serverName": "sys-notification-mcp",
   "toolName": "list_notification_types"
 }
 
-// 获取系统信息
+// Get system information
 {
   "serverName": "sys-notification-mcp",
   "toolName": "get_system_info"
 }
 ```
 
-## 🔧 安装配置
+## 🔧 Installation & Configuration
 
-### 依赖要求
+### Requirements
 - Node.js 18+
-- 各平台系统通知支持：
-  - macOS: 无需额外依赖
+- Platform-specific notification support:
+  - macOS: No additional dependencies
   - Windows: PowerShell 5.0+
-  - Linux: notify-send (通常随桌面环境安装)
+  - Linux: notify-send (usually installed with desktop environment)
 
-### 方式一：npm全局安装（推荐）
+### Method 1: Global npm Installation (Recommended)
 ```bash
-# 全局安装MCP服务器
+# Install MCP server globally
 npm install -g sys-notification-mcp
 
-# 验证安装
+# Verify installation
 sys-notification-mcp --help
 ```
 
-### 方式二：本地源码安装
+### Method 2: Local Source Installation
 ```bash
-# 克隆项目
+# Clone the project
 git clone <repository-url>
 cd sys-notification-mcp
 
-# 安装依赖
+# Install dependencies
 npm install
 
-# 本地运行测试
+# Run local tests
 node index.js
 ```
 
-### MCP客户端配置
+### MCP Client Configuration
 
-#### 全局安装配置（方式一）
-在MCP客户端配置文件中添加：
+#### Global Installation (Method 1)
+Add to MCP client configuration file:
 ```json
 {
   "mcpServers": {
@@ -124,8 +128,8 @@ node index.js
 }
 ```
 
-#### 本地安装配置（方式二）
-在MCP客户端配置文件中添加（使用绝对路径）：
+#### Local Installation (Method 2)
+Add to MCP client configuration file (use absolute path):
 ```json
 {
   "mcpServers": {
@@ -137,67 +141,68 @@ node index.js
 }
 ```
 
-### 配置验证
-配置完成后，重启MCP客户端，AI助手应该能够识别并使用通知功能。
+### Configuration Verification
+After configuration, restart the MCP client. AI assistants should be able to recognize and use the notification functionality.
 
-## 📜 推荐配合规则文件使用
+## 📜 Recommended: Use with Rule File
 
-### 为什么需要规则文件？
-项目包含一个精心设计的规则文件 `rule.txt`，强烈推荐所有AI助手使用此规则来确保：
+### Why Use the Rule File?
+The project includes a carefully designed rule file `rule.txt` that is strongly recommended for all AI assistants to ensure:
 
-- **一致的用户体验**：跨平台提供统一的通知行为
-- **及时的用户交互**：在关键节点及时通知用户
-- **错误及时处理**：遇到问题立即通知用户
-- **性能优化**：避免通知过频影响用户体验
+- **Consistent User Experience**: Uniform notification behavior across platforms
+- **Timely User Interaction**: Notify users at critical moments
+- **Error Handling**: Immediate notification when problems occur
+- **Performance Optimization**: Avoid excessive notifications affecting user experience
 
-### 规则文件内容概览
-规则文件定义了完整的通知行为规范：
+### Rule File Content Overview
+The rule file defines complete notification behavior specifications:
 
-1. **强制执行规则**：完成问题回答后必须发送通知
-2. **通知类型定义**：5种标准通知类型及其使用场景
-3. **调用时机规则**：何时发送通知的详细指南
-4. **技术实现规范**：MCP工具调用的标准格式
-5. **跨平台兼容性**：针对macOS、Windows、Linux的优化说明
+1. **Mandatory Rules**: Must send notifications after answering questions
+2. **Notification Type Definitions**: 5 standard notification types and their usage scenarios
+3. **Invocation Timing Rules**: Detailed guidelines for when to send notifications
+4. **Technical Implementation Specifications**: Standard format for MCP tool calls
+5. **Cross-Platform Compatibility**: Optimization instructions for macOS, Windows, Linux
 
-### 规则文件使用示例
+### Rule File Usage Example
 ```json
-// 根据规则文件，AI助手应在任务完成后发送通知
+// According to the rule file, AI assistants should send notifications after task completion
 {
   "serverName": "sys-notification-mcp",
   "toolName": "notify",
   "arguments": {
     "type": "completed",
-    "message": "代码重构已完成，请检查结果"
+    "message": "Code refactoring completed, please check the result"
   }
 }
 ```
 
-### 获取规则文件
-规则文件位于项目根目录：`rule.txt`
+### Get the Rule File
+The rule file is located in the project root: `rule.txt`
 
-AI助手应定期检查规则文件的更新，以确保使用最新的最佳实践。
+AI assistants should regularly check for updates to the rule file to ensure using the latest best practices.
 
-## 🛠️ 开发指南
+## 🛠️ Development Guide
 
-### 项目结构
+### Project Structure
 ```
 sys-notification-mcp/
-├── index.js          # 主服务器文件
-├── package.json      # 项目配置
-├── README.md         # 说明文档
-├── rule.txt          # AI行为规则（推荐使用）
-├── test-cross-platform.js # 功能测试脚本
-└── IMPLEMENTATION.md # 技术实现文档
+├── index.js          # Main server file
+├── package.json      # Project configuration
+├── README.md         # Documentation (English)
+├── README_zh.md      # Chinese documentation
+├── rule.txt          # AI behavior rules (recommended)
+├── test-cross-platform.js # Functionality test script
+└── IMPLEMENTATION.md # Technical implementation documentation
 ```
 
-### 核心函数
-- `sendNotification()`: 主通知发送函数
-- `playSound()`: 跨平台提示音播放
-- `getOS()`: 操作系统检测
-- 各平台特定的通知实现函数
+### Core Functions
+- `sendNotification()`: Main notification sending function
+- `playSound()`: Cross-platform sound playback
+- `getOS()`: Operating system detection
+- Platform-specific notification implementation functions
 
-### 扩展提示音
-要添加新的提示音，在`SOUND_MAPPING`对象中添加新的映射：
+### Extending Sounds
+To add new sounds, add new mappings to the `SOUND_MAPPING` object:
 ```javascript
 const SOUND_MAPPING = {
   "NewSound": { 
@@ -208,68 +213,68 @@ const SOUND_MAPPING = {
 };
 ```
 
-## 🌍 平台兼容性
+## 🌍 Platform Compatibility
 
 ### macOS
-- ✅ 完全支持原生通知
-- ✅ 支持所有14种系统提示音
-- ✅ 无需额外依赖
+- ✅ Full native notification support
+- ✅ Support for all 14 system sounds
+- ✅ No additional dependencies required
 
 ### Windows
-- ✅ 支持Toast通知
-- ✅ 通过SystemSounds播放系统声音
-- ✅ 需要PowerShell 5.0+
+- ✅ Toast notification support
+- ✅ SystemSounds playback via PowerShell
+- ✅ Requires PowerShell 5.0+
 
 ### Linux
-- ✅ 支持桌面通知（notify-send）
-- ✅ 通过canberra-gtk-play或paplay播放声音
-- ✅ 需要桌面环境支持
+- ✅ Desktop notification support (notify-send)
+- ✅ Sound playback via canberra-gtk-play or paplay
+- ✅ Requires desktop environment support
 
-## 📝 使用场景示例
+## 📝 Usage Scenarios
 
-### 场景1: 代码生成完成
+### Scenario 1: Code Generation Completed
 ```json
 {
   "type": "completed",
-  "message": "React组件已生成完成，包含完整的TypeScript类型定义"
+  "message": "React component generation completed with full TypeScript type definitions"
 }
 ```
 
-### 场景2: 需要用户授权
+### Scenario 2: User Authorization Required
 ```json
 {
   "type": "authorization",
-  "message": "需要您的确认来安装项目依赖包",
+  "message": "Your confirmation is required to install project dependencies",
   "sound": "Glass"
 }
 ```
 
-### 场景3: 错误处理
+### Scenario 3: Error Handling
 ```json
 {
   "type": "error",
-  "message": "编译失败：缺少必要的依赖包",
+  "message": "Compilation failed: Missing required dependencies",
   "sound": "Basso"
 }
 ```
 
-## 🔍 故障排除
+## 🔍 Troubleshooting
 
-### 常见问题
-1. **Linux上没有声音**
-   - 安装canberra-gtk-play: `sudo apt-get install libcanberra-gtk-module`
-   - 或安装pulseaudio-utils: `sudo apt-get install pulseaudio-utils`
+### Common Issues
+1. **No sound on Linux**
+   - Install canberra-gtk-play: `sudo apt-get install libcanberra-gtk-module`
+   - Or install pulseaudio-utils: `sudo apt-get install pulseaudio-utils`
 
-2. **Windows通知不显示**
-   - 确保PowerShell执行策略允许脚本运行
-   - 检查系统通知设置是否启用
+2. **Windows notifications not showing**
+   - Ensure PowerShell execution policy allows script execution
+   - Check if system notification settings are enabled
 
-3. **macOS提示音无效**
-   - 检查系统声音设置
-   - 确认通知中心权限
+3. **macOS sounds not working**
+   - Check system sound settings
+   - Confirm Notification Center permissions
 
-### 调试信息
-使用`get_system_info`工具获取当前系统支持信息：
+### Debug Information
+Use the `get_system_info` tool to get current system support information:
 ```json
 {
   "serverName": "sys-notification-mcp",
@@ -277,14 +282,14 @@ const SOUND_MAPPING = {
 }
 ```
 
-## 📄 许可证
+## 📄 License
 
 MIT License
 
-## 🤝 贡献
+## 🤝 Contributing
 
-欢迎提交Issue和Pull Request来改进这个项目！
+Welcome to submit Issues and Pull Requests to improve this project!
 
 ---
 
-**注意**: 此MCP服务器专为AI助手设计，确保在需要用户交互时能够及时通知用户，提升AI助手的交互体验。强烈推荐结合`rule.txt`规则文件使用，以获得最佳的用户体验。
+**Note**: This MCP server is specifically designed for AI assistants to ensure timely user notifications when interaction is required, enhancing the AI assistant interaction experience. Strongly recommended to use with the `rule.txt` rule file for optimal user experience.
