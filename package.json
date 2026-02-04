@@ -1,6 +1,6 @@
 {
   "name": "sys-notification-mcp",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "跨平台MCP服务器，提供系统通知功能 - 支持macOS、Windows和Linux",
   "type": "module",
   "main": "index.js",

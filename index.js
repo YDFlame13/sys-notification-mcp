@@ -83,7 +83,7 @@ sys-notification-mcp - 跨平台MCP通知服务器 v1.0.0
 
 // 显示版本信息
 function showVersion() {
-  console.log('sys-notification-mcp v1.0.0');
+  console.log('sys-notification-mcp v1.0.1');
   console.log('跨平台MCP通知服务器');
   console.log('Node.js', process.version);
 }
