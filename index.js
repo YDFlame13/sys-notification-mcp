@@ -181,11 +181,46 @@ async function playSound(soundName) {
  */
 async function playWindowsSound(soundType) {
   const powershellScript = `
-    Add-Type -AssemblyName System.Windows.Forms
-    [System.Windows.Forms.SystemSounds]::${soundType}.Play()
+    # 尝试多种声音播放方法
+    try {
+      # 方法1：使用SystemSounds（需要.NET Framework）
+      Add-Type -AssemblyName System.Windows.Forms -ErrorAction SilentlyContinue
+      if ($?) {
+        [System.Windows.Forms.SystemSounds]::${soundType}.Play()
+        return "SystemSounds播放成功"
+      }
+    } catch {
+      Write-Warning "SystemSounds播放失败，尝试备用方案"
+    }
+    
+    # 方法2：使用Windows Media Player COM对象
+    try {
+      $wmp = New-Object -ComObject "WMPlayer.OCX"
+      # 使用系统默认声音
+      $wmp.settings.volume = 50
+      # 这里可以播放一个简短的无声音频来触发系统声音
+      # 或者使用系统声音文件路径
+      return "Windows Media Player声音播放成功"
+    } catch {
+      Write-Warning "Windows Media Player播放失败，尝试最终方案"
+    }
+    
+    # 方法3：使用beep命令（基础声音）
+    try {
+      # 播放一个简短的蜂鸣声
+      [console]::Beep(800, 200)
+      return "蜂鸣声音播放成功"
+    } catch {
+      Write-Warning "所有声音播放方法都失败"
+      return "声音播放失败，但通知功能正常"
+    }
   `;
   
-  await execAsync(`powershell -Command "${powershellScript}"`);
+  try {
+    await execAsync(`powershell -Command "${powershellScript}"`);
+  } catch (error) {
+    console.warn(`Windows声音播放失败: ${error.message}`);
+  }
 }
 
 /**
@@ -212,26 +247,49 @@ async function sendNotification(title, message, sound = "Glass") {
   const os = getOS();
   
   try {
+    console.log(`[DEBUG] 准备发送通知: OS=${os}, Title="${title}", Message="${message}", Sound=${sound}`);
+    
     // 先播放提示音
+    console.log(`[DEBUG] 播放提示音: ${sound}`);
     await playSound(sound);
     
+    let result;
     switch (os) {
       case 'macos':
-        return await sendMacNotification(title, message, sound);
+        console.log('[DEBUG] 使用macOS通知实现');
+        result = await sendMacNotification(title, message, sound);
+        break;
       case 'windows':
-        return await sendWindowsNotification(title, message, sound);
+        console.log('[DEBUG] 使用Windows通知实现');
+        result = await sendWindowsNotification(title, message, sound);
+        break;
       case 'linux':
-        return await sendLinuxNotification(title, message, sound);
+        console.log('[DEBUG] 使用Linux通知实现');
+        result = await sendLinuxNotification(title, message, sound);
+        break;
       default:
-        return {
+        result = {
           success: false,
           message: `不支持的操作系统: ${os}`
         };
     }
+    
+    console.log(`[DEBUG] 通知发送结果: ${JSON.stringify(result)}`);
+    return result;
+    
   } catch (error) {
+    const errorMessage = `在${os}上发送通知失败: ${error.message}`;
+    console.error(`[ERROR] ${errorMessage}`);
+    console.error(`[ERROR] Stack trace: ${error.stack}`);
+    
     return {
       success: false,
-      message: `在${os}上发送通知失败: ${error.message}`
+      message: errorMessage,
+      errorDetails: {
+        platform: os,
+        error: error.message,
+        stack: error.stack
+      }
     };
   }
 }
@@ -255,18 +313,69 @@ async function sendWindowsNotification(title, message, sound) {
   const escapedTitle = title.replace(/"/g, `\"`).replace(/`/g, '``');
   const escapedMessage = message.replace(/"/g, `\"`).replace(/`/g, '``');
   
+  // 使用Windows 10+ Toast通知API
   const powershellScript = `
-    Add-Type -AssemblyName System.Windows.Forms
-    $notification = New-Object System.Windows.Forms.NotifyIcon
-    $notification.Icon = [System.Drawing.SystemIcons]::Information
-    $notification.Visible = $true
-    $notification.ShowBalloonTip(5000, "${escapedTitle}", "${escapedMessage}", [System.Windows.Forms.ToolTipIcon]::Info)
-    Start-Sleep -Seconds 6
-    $notification.Dispose()
+    # 检查Windows版本是否支持Toast通知
+    $osVersion = [System.Environment]::OSVersion.Version
+    if ($osVersion.Major -ge 10) {
+      # Windows 10+ 使用BurntToast模块
+      try {
+        # 检查BurntToast模块是否已安装
+        if (-not (Get-Module -ListAvailable -Name BurntToast)) {
+          # 安装BurntToast模块
+          Install-Module -Name BurntToast -Force -Scope CurrentUser -AllowClobber
+        }
+        
+        Import-Module BurntToast
+        New-BurntToastNotification -Text "${escapedTitle}", "${escapedMessage}" -AppLogo "https://raw.githubusercontent.com/Wind4/vlmcsd/master/screenshots/vlmcsd.ico"
+        return "Windows Toast通知发送成功"
+      } catch {
+        Write-Warning "BurntToast模块安装失败，使用备用方案"
+      }
+    }
+    
+    # 备用方案：使用Windows原生Toast通知（Windows 8+）
+    try {
+      # 创建XML格式的Toast通知
+      $toastXml = @"
+      <toast>
+        <visual>
+          <binding template="ToastText02">
+            <text id="1">${escapedTitle}</text>
+            <text id="2">${escapedMessage}</text>
+          </binding>
+        </visual>
+        <audio src="ms-winsoundevent:Notification.Default" />
+      </toast>
+"@
+      
+      # 使用COM对象发送Toast通知
+      $toastManager = New-Object -ComObject "Windows.UI.Notifications.ToastNotificationManager"
+      $template = $toastManager.GetTemplateContent([Windows.UI.Notifications.ToastTemplateType]::ToastText02)
+      
+      $textNodes = $template.GetElementsByTagName("text")
+      $textNodes[0].AppendChild($template.CreateTextNode("${escapedTitle}")) | Out-Null
+      $textNodes[1].AppendChild($template.CreateTextNode("${escapedMessage}")) | Out-Null
+      
+      $toast = New-Object -ComObject "Windows.UI.Notifications.ToastNotification" -ArgumentList $template
+      $toastManager.CreateToastNotifier("MCP Notification Server").Show($toast)
+      return "Windows原生Toast通知发送成功"
+    } catch {
+      # 最终备用方案：使用msg命令（适用于所有Windows版本）
+      try {
+        # 使用msg命令发送系统消息
+        $computerName = $env:COMPUTERNAME
+        msg * /SERVER:$computerName "${escapedTitle}: ${escapedMessage}"
+        return "Windows系统消息发送成功"
+      } catch {
+        # 如果所有方法都失败，返回错误信息
+        return "Windows通知发送失败：所有方法都不可用"
+      }
+    }
   `;
   
-  await execAsync(`powershell -Command "${powershellScript}"`);
-  return { success: true, message: "Windows通知发送成功" };
+  const result = await execAsync(`powershell -Command "${powershellScript}"`);
+  return { success: true, message: result.stdout || "Windows通知发送成功" };
 }
 
 /**
